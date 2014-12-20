@@ -1,0 +1,11 @@
+Tue Nov 18 21:18:02 CET 2014: Stream 16 : Starting Refresh Stream 2...
+BEGIN
+CREATE TABLE
+COPY 15000
+CREATE INDEX
+ANALYZE
+DELETE 60045
+DELETE 15000
+COMMIT
+Tue Nov 18 21:18:34 CET 2014: Stream 16 : Refresh Stream 2 completed.
+Stream 16 : Elapsed time for Refresh Stream 2 : 32 seconds

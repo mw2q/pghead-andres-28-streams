@@ -1,0 +1,41 @@
+BEGIN;
+BEGIN
+select
+	l_orderkey,
+	sum(l_extendedprice * (1 - l_discount)) as revenue,
+	o_orderdate,
+	o_shippriority
+from
+	customer,
+	orders,
+	lineitem
+where
+	c_mktsegment = 'AUTOMOBILE'
+	and c_custkey = o_custkey
+	and l_orderkey = o_orderkey
+	and o_orderdate < date '1995-03-21'
+	and l_shipdate > date '1995-03-21'
+group by
+	l_orderkey,
+	o_orderdate,
+	o_shippriority
+order by
+	revenue desc,
+	o_orderdate
+LIMIT 10;
+ l_orderkey |     revenue      | o_orderdate | o_shippriority 
+------------+------------------+-------------+----------------
+   34806048 | 470788.736583128 | 1995-03-19  |              0
+   37432583 | 440424.662410528 | 1995-02-27  |              0
+    6609121 |    427361.997569 | 1995-03-19  |              0
+   44331334 | 423916.732530687 | 1995-02-27  |              0
+   37913317 | 423206.043036818 | 1995-02-03  |              0
+   55864096 | 418593.368213082 | 1995-03-19  |              0
+   36847968 |  416070.65504337 | 1995-02-23  |              0
+   37635105 | 413815.115903087 | 1995-03-12  |              0
+   52028738 | 410551.888959351 | 1995-03-11  |              0
+   25957059 | 409459.536765912 | 1995-03-09  |              0
+(10 rows)
+
+COMMIT;
+COMMIT

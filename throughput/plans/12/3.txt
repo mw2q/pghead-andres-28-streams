@@ -1,0 +1,52 @@
+BEGIN;
+BEGIN
+EXPLAIN
+select
+	l_orderkey,
+	sum(l_extendedprice * (1 - l_discount)) as revenue,
+	o_orderdate,
+	o_shippriority
+from
+	customer,
+	orders,
+	lineitem
+where
+	c_mktsegment = 'AUTOMOBILE'
+	and c_custkey = o_custkey
+	and l_orderkey = o_orderkey
+	and o_orderdate < date '1995-03-19'
+	and l_shipdate > date '1995-03-19'
+group by
+	l_orderkey,
+	o_orderdate,
+	o_shippriority
+order by
+	revenue desc,
+	o_orderdate
+LIMIT 10;
+                                                                     QUERY PLAN                                                                     
+----------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=2667603.10..2667603.13 rows=10 width=20)
+   ->  Sort  (cost=2667603.10..2675474.41 rows=3148521 width=20)
+         Sort Key: (sum((lineitem.l_extendedprice * (1::double precision - lineitem.l_discount)))), orders.o_orderdate
+         ->  HashAggregate  (cost=2568079.49..2599564.70 rows=3148521 width=20)
+               Group Key: lineitem.l_orderkey, orders.o_orderdate, orders.o_shippriority
+               ->  Hash Join  (cost=551460.29..2520851.67 rows=3148521 width=20)
+                     Hash Cond: (lineitem.l_orderkey = orders.o_orderkey)
+                     ->  Seq Scan on lineitem  (cost=0.00..1817047.56 rows=32228963 width=12)
+                           Filter: (l_shipdate > '1995-03-19'::date)
+                     ->  Hash  (cost=533124.69..533124.69 rows=1466848 width=12)
+                           ->  Hash Join  (cost=49712.29..533124.69 rows=1466848 width=12)
+                                 Hash Cond: (orders.o_custkey = customer.c_custkey)
+                                 ->  Seq Scan on orders  (cost=0.00..441209.30 rows=7342564 width=16)
+                                       Filter: (o_orderdate < '1995-03-19'::date)
+                                 ->  Hash  (cost=45966.54..45966.54 rows=299660 width=4)
+                                       ->  Bitmap Heap Scan on customer  (cost=6942.79..45966.54 rows=299660 width=4)
+                                             Recheck Cond: (c_mktsegment = 'AUTOMOBILE'::bpchar)
+                                             ->  Bitmap Index Scan on customer_c_mktsegment_c_custkey_idx  (cost=0.00..6867.88 rows=299660 width=0)
+                                                   Index Cond: (c_mktsegment = 'AUTOMOBILE'::bpchar)
+ Planning time: 8.028 ms
+(20 rows)
+
+COMMIT;
+COMMIT
